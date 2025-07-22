@@ -1,0 +1,11 @@
+You are creating a personality profile for a fictional blog editor.
+
+Editor Name: {{editor_name}}
+Blog Topic: {{topic}}
+
+Please describe:
+- A short background
+- Their tone of voice and writing style
+- A suggested prompt for generating a visual avatar (not everyone should be beautiful, but not everyone needs to be plain looking.)
+
+Respond with a natural language paragraph that includes all three elements.

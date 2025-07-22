@@ -26,6 +26,19 @@ def load_prompt_template(name: str) -> str:
     with open(PROMPTS_DIR / name, "r") as f:
         return f.read()
 
+def generate_blog_idea():
+    prompt_template = load_prompt_template("idea_prompt.txt")
+    response = run_ollama_prompt(prompt_template)
+
+    try:
+        matches = re.findall(r'\{.*?\}', response, re.DOTALL)
+        idea_json = json.loads(matches[0]) if matches else {}
+        return idea_json
+    except Exception as e:
+        print("Error parsing JSON from Ollama response:", e)
+        print(response)
+        return None
+
 def save_registry_entry(site_name: str, topic: str):
     REGISTRY_FILE.parent.mkdir(parents=True, exist_ok=True)
     if REGISTRY_FILE.exists():
@@ -53,23 +66,19 @@ def is_duplicate(site_name: str, topic: str) -> bool:
             return True
     return False
 
-# --- MAIN WORKFLOW ---
-def generate_blog_idea():
-    prompt = load_prompt_template("idea_prompt.txt")
-    output = run_ollama_prompt(prompt)
-
-    try:
-        match = re.search(r"{.*?}", output, re.DOTALL)
-        if not match:
-            raise ValueError("No JSON object found in output.")
-
-        idea_json = json.loads(match.group(0))
-    except Exception as e:
-        print("Error parsing JSON from Ollama response:", e)
-        print("Full output:\n", output)
-        return None
-
-    return idea_json
+def generate_editor_profile(editor_name: str, topic: str, output_folder: Path):
+    prompt_template = load_prompt_template("editor_profile_prompt.txt")
+    prompt = prompt_template.replace("{{editor_name}}", editor_name).replace("{{topic}}", topic)
+    result = run_ollama_prompt(prompt)
+    editor_data = {
+        "name": editor_name,
+        "topic": topic,
+        "profile": result.strip()
+    }
+    output_folder.mkdir(parents=True, exist_ok=True)
+    profile_path = output_folder / f"{editor_name.replace(' ', '_').lower()}.json"
+    with open(profile_path, "w") as f:
+        json.dump(editor_data, f, indent=2)
 
 def generate_site(site_name: str, topic: str, editors: list):
     prompt_template = load_prompt_template("site_prompt.txt")
@@ -84,6 +93,11 @@ def generate_site(site_name: str, topic: str, editors: list):
     result = run_ollama_prompt(filled_prompt)
     (blog_folder / "site_generated.txt").write_text(result)
     print(f"✅ Blog '{site_name}' generated at: {blog_folder}")
+
+    # Generate profiles for each editor
+    editors_folder = blog_folder / "editors"
+    for editor in editors:
+        generate_editor_profile(editor, topic, editors_folder)
 
 # --- RUN ---
 if __name__ == "__main__":
