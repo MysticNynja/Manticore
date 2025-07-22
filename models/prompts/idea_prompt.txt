@@ -1,0 +1,15 @@
+Invent a brand new blog idea that covers a unique and creative niche.
+
+Respond in JSON format like this:
+{
+  "site_name": "...",
+  "topic": "...",
+  "editors": ["...", "...", "..."]
+}
+
+Rules:
+- The topic must be original and not previously suggested.
+- The blog name should be catchy and brandable.
+- The editors must have distinct names.
+
+Do not repeat earlier blog topics or names.
