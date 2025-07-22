@@ -29,8 +29,11 @@ def load_prompt_template(name: str) -> str:
 def save_registry_entry(site_name: str, topic: str):
     REGISTRY_FILE.parent.mkdir(parents=True, exist_ok=True)
     if REGISTRY_FILE.exists():
-        with open(REGISTRY_FILE, "r") as f:
-            registry = json.load(f)
+        try:
+            with open(REGISTRY_FILE, "r") as f:
+                registry = json.load(f)
+        except json.JSONDecodeError:
+            registry = []
     else:
         registry = []
     registry.append({"site_name": site_name, "topic": topic})
@@ -40,8 +43,11 @@ def save_registry_entry(site_name: str, topic: str):
 def is_duplicate(site_name: str, topic: str) -> bool:
     if not REGISTRY_FILE.exists():
         return False
-    with open(REGISTRY_FILE, "r") as f:
-        registry = json.load(f)
+    try:
+        with open(REGISTRY_FILE, "r") as f:
+            registry = json.load(f)
+    except json.JSONDecodeError:
+        return False
     for entry in registry:
         if entry["site_name"].lower() == site_name.lower() or entry["topic"].lower() == topic.lower():
             return True
