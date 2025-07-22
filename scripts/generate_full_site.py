@@ -1,6 +1,7 @@
 import os
 import json
 import subprocess
+import re
 from pathlib import Path
 from datetime import datetime
 
@@ -52,10 +53,14 @@ def generate_blog_idea():
     output = run_ollama_prompt(prompt)
 
     try:
-        idea_json = json.loads(output.split("```json")[-1].split("```")[-2].strip())
+        match = re.search(r"{.*?}", output, re.DOTALL)
+        if not match:
+            raise ValueError("No JSON object found in output.")
+
+        idea_json = json.loads(match.group(0))
     except Exception as e:
         print("Error parsing JSON from Ollama response:", e)
-        print(output)
+        print("Full output:\n", output)
         return None
 
     return idea_json
