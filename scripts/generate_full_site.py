@@ -94,7 +94,13 @@ if __name__ == "__main__":
 
     site_name = idea["site_name"]
     topic = idea["topic"]
-    editors = idea["editors"]
+
+    # Clean editor names to remove titles like "Dr.", "Mr.", etc.
+    raw_editors = idea["editors"]
+    editors = [
+        re.sub(r"^(Dr\.|Mr\.|Mrs\.|Ms\.|Prof\.)\s+", "", name.strip(), flags=re.IGNORECASE)
+        for name in raw_editors
+    ]
 
     if is_duplicate(site_name, topic):
         print(f"⚠️ Duplicate blog idea: '{site_name}' / '{topic}'")
