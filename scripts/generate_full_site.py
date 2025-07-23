@@ -5,6 +5,7 @@ import re
 from pathlib import Path
 from datetime import datetime
 from generate_articles import generate_articles
+from generate_editor import generate_editor_profile 
 
 # --- CONFIG ---
 OLLAMA_MODEL = "llama3"
@@ -116,7 +117,7 @@ def generate_site(site_name: str, topic: str, editors: list):
     # Generate profiles for each editor
     editors_folder = blog_folder / "editors"
     for editor in editors:
-        generate_editor_profile(editor, topic, editors_folder)
+        generate_editor_profile(editor_name=editor, topic=topic, output_folder=editors_folder)
 
 # --- RUN ---
 if __name__ == "__main__":
