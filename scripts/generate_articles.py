@@ -1,75 +1,89 @@
-# generate_articles.py
 import os
 import json
+import subprocess
 import random
-import re
+from datetime import datetime
 from pathlib import Path
-from generate_site import run_ollama_prompt, load_prompt_template, BLOGS_DIR
 
+# --- CONFIG ---
+OLLAMA_MODEL = "llama3"
+BASE_DIR = Path(__file__).resolve().parent.parent
+BLOGS_DIR = BASE_DIR / "blogs"
+PROMPTS_DIR = BASE_DIR / "models" / "prompts"
 
-def parse_article_response(raw_response: str) -> dict:
-    try:
-        matches = re.findall(r'\{.*?\}', raw_response, re.DOTALL)
-        article_data = json.loads(matches[0]) if matches else {}
-        return article_data
-    except Exception as e:
-        print("Error parsing article response:", e)
-        print(raw_response)
-        return {}
+# --- HELPERS ---
+def run_ollama_prompt(prompt: str) -> str:
+    result = subprocess.run(
+        ["ollama", "run", OLLAMA_MODEL],
+        input=prompt.encode(),
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+    return result.stdout.decode()
 
+def load_prompt_template(name: str) -> str:
+    with open(PROMPTS_DIR / name, "r") as f:
+        return f.read()
 
-def generate_articles_for_editor(site_folder: Path, editor_profile: dict, topic: str):
-    editor_name = editor_profile["name"]
-    tone = editor_profile.get("tone", "")
+def load_editors(blog_path: Path) -> list:
+    editors_path = blog_path / "editors"
+    return [json.load(open(editors_path / f)) for f in os.listdir(editors_path) if f.endswith(".json")]
 
+def get_article_topics(site_topic: str, num_articles: int = 5) -> list:
+    # Optionally replace this with dynamic topic generation
+    return [f"Deep dive into {site_topic} #{i+1}" for i in range(num_articles)]
+
+def generate_article(blog_path: Path, editor: dict, article_topic: str, tags: list):
     prompt_template = load_prompt_template("article_prompt.txt")
 
-    # Random number of articles per editor
-    article_count = random.randint(1, 3)
-    articles_folder = site_folder / "articles" / editor_name.replace(" ", "_").lower()
-    articles_folder.mkdir(parents=True, exist_ok=True)
+    prompt = prompt_template.replace("{{editor_name}}", editor["name"])
+    prompt = prompt.replace("{{site_name}}", blog_path.name.replace("_", " "))
+    prompt = prompt.replace("{{topic}}", editor["topic"])
+    prompt = prompt.replace("{{editor_tone}}", editor.get("tone", "Neutral"))
+    prompt = prompt.replace("{{editor_background}}", editor.get("background", ""))
+    prompt = prompt.replace("{{date}}", datetime.now().strftime('%Y-%m-%d'))
+    prompt = prompt.replace("{{comma_separated_tags}}", ", ".join(tags))
+    prompt = prompt.replace("{{avatar_filename}}", editor["name"].replace(" ", "_").lower() + ".png")
+    prompt = prompt.replace("{{article_topic}}", article_topic)
 
-    for i in range(article_count):
-        prompt = prompt_template.replace("{{editor_name}}", editor_name)
-        prompt = prompt.replace("{{topic}}", topic)
-        prompt = prompt.replace("{{tone}}", tone)
+    result = run_ollama_prompt(prompt)
 
-        print(f"\n📝 Generating article {i + 1} for {editor_name}...")
-        result = run_ollama_prompt(prompt)
-        parsed = parse_article_response(result)
+    # Save to articles folder
+    articles_path = blog_path / "articles"
+    articles_path.mkdir(parents=True, exist_ok=True)
+    slug = article_topic.lower().replace(" ", "-").replace("#", "")
+    filename = f"{editor['name'].replace(' ', '_').lower()}_{slug}.md"
+    with open(articles_path / filename, "w") as f:
+        f.write(result)
 
-        if parsed:
-            slug = re.sub(r'[^a-zA-Z0-9_-]', '', parsed["title"].replace(" ", "_").lower())
-            out_path = articles_folder / f"{slug}.json"
-            with open(out_path, "w") as f:
-                json.dump(parsed, f, indent=2)
-        else:
-            print("❌ Failed to parse article.")
+    print(f"✅ Article saved: {filename}")
 
-
+# --- RUN ---
 if __name__ == "__main__":
-    # Discover existing blogs
-    blogs = [d for d in BLOGS_DIR.iterdir() if d.is_dir() and (d / "site_generated.txt").exists()]
+    # Get most recent blog folder
+    all_blogs = sorted(BLOGS_DIR.iterdir(), key=os.path.getmtime, reverse=True)
+    if not all_blogs:
+        print("❌ No blog directories found.")
+        exit(1)
 
-    print("Available Blogs:")
-    for i, blog in enumerate(blogs):
-        print(f"[{i}] {blog.name}")
-
-    selected = int(input("Select a blog by number: "))
-    blog_folder = blogs[selected]
-
-    # Load topic
-    with open(blog_folder / "site_generated.txt") as f:
-        site_text = f.read()
-    topic_match = re.search(r'Topic\s*[:\-]\s*(.+)', site_text, re.IGNORECASE)
-    topic = topic_match.group(1).strip() if topic_match else "Unknown"
+    blog_path = all_blogs[0]
+    print(f"📂 Using blog: {blog_path.name}")
 
     # Load editors
-    editors_folder = blog_folder / "editors"
-    editor_files = list(editors_folder.glob("*.json"))
-    for editor_file in editor_files:
-        with open(editor_file) as f:
-            profile = json.load(f)
-            generate_articles_for_editor(blog_folder, profile, topic)
+    editors = load_editors(blog_path)
+    tags = []
+    try:
+        with open(BASE_DIR / "registry" / "blogs_registry.json") as f:
+            registry = json.load(f)
+            for entry in registry:
+                if entry["site_name"].replace(" ", "_").lower() == blog_path.name:
+                    tags = entry.get("tags", [])
+                    break
+    except:
+        pass
 
-    print("\n✅ All articles generated.")
+    # Generate topics and articles
+    article_topics = get_article_topics(editors[0]['topic'], num_articles=7)
+    for i, editor in enumerate(editors):
+        topic = article_topics[i % len(article_topics)]
+        generate_article(blog_path, editor, topic, tags)
