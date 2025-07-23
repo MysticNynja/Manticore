@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+from editor_utils import generate_editor_profile  # now from shared module
 
 # --- CONFIG ---
 BASE_DIR = Path(__file__).resolve().parent.parent
