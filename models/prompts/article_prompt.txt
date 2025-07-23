@@ -6,9 +6,14 @@ Your personality and tone are described as:
 Your background is:
 {{editor_background}}
 
-Please write a long-form, engaging blog article designed to be monetizable via ads, affiliate links, digital products, or ebooks. The article should be written for both SEO and social media virality. It should be valuable, well-structured, and in-depth (around 800–1200 words).
+Please write a long-form, engaging blog article designed to be monetizable via ads, affiliate links, digital products, or ebooks. The article should be written for both SEO and social media virality. It should be valuable, well-structured, and in-depth (around 800–1200 words). Use a compelling and unique title, and ensure a strong introduction, skimmable layout, and a thoughtful conclusion.
 
 Choose a unique, compelling title that will stand out.
+
+You are writing a long-form, engaging blog article intended for:
+- Monetization (ads, affiliate links, digital products, ebooks)
+- SEO performance
+- Social media virality (TikTok, X, YouTube Shorts, Instagram)
 
 The output should be in **Markdown format**, and must begin with a YAML frontmatter block like this:
 
