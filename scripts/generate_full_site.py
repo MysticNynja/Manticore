@@ -39,7 +39,7 @@ def generate_blog_idea():
         print(response)
         return None
 
-def save_registry_entry(site_name: str, topic: str):
+def save_registry_entry(site_name: str, topic: str, tags: list = []):
     REGISTRY_FILE.parent.mkdir(parents=True, exist_ok=True)
     if REGISTRY_FILE.exists():
         try:
@@ -49,7 +49,7 @@ def save_registry_entry(site_name: str, topic: str):
             registry = []
     else:
         registry = []
-    registry.append({"site_name": site_name, "topic": topic})
+    registry.append({"site_name": site_name, "topic": topic, "tags": tags})
     with open(REGISTRY_FILE, "w") as f:
         json.dump(registry, f, indent=2)
 
@@ -66,15 +66,33 @@ def is_duplicate(site_name: str, topic: str) -> bool:
             return True
     return False
 
+def parse_editor_profile(raw_profile: str) -> dict:
+    background_match = re.search(r"(?i)(background|story)[\s:.-]*(.*?)(?=tone of voice|writing style|avatar|$)", raw_profile, re.DOTALL)
+    tone_match = re.search(r"(?i)(tone of voice|writing style)[\s:.-]*(.*?)(?=avatar|$)", raw_profile, re.DOTALL)
+    avatar_match = re.search(r"(?i)(avatar prompt|visual description)[\s:.-]*(.*)$", raw_profile, re.DOTALL)
+
+    return {
+        "background": background_match.group(2).strip() if background_match else "",
+        "tone": tone_match.group(2).strip() if tone_match else "",
+        "avatar_prompt": avatar_match.group(2).strip() if avatar_match else "",
+        "raw_profile": raw_profile.strip()
+    }
+
 def generate_editor_profile(editor_name: str, topic: str, output_folder: Path):
     prompt_template = load_prompt_template("editor_profile_prompt.txt")
     prompt = prompt_template.replace("{{editor_name}}", editor_name).replace("{{topic}}", topic)
     result = run_ollama_prompt(prompt)
+    parsed = parse_editor_profile(result)
+
     editor_data = {
         "name": editor_name,
         "topic": topic,
-        "profile": result.strip()
+        "background": parsed["background"],
+        "tone": parsed["tone"],
+        "avatar_prompt": parsed["avatar_prompt"],
+        "raw_profile": parsed["raw_profile"]
     }
+
     output_folder.mkdir(parents=True, exist_ok=True)
     profile_path = output_folder / f"{editor_name.replace(' ', '_').lower()}.json"
     with open(profile_path, "w") as f:
@@ -108,16 +126,17 @@ if __name__ == "__main__":
 
     site_name = idea["site_name"]
     topic = idea["topic"]
+    tags = idea.get("tags", [])
 
     # Clean editor names to remove titles like "Dr.", "Mr.", etc.
     raw_editors = idea["editors"]
     editors = [
-        re.sub(r"^(Dr\.|Mr\.|Mrs\.|Ms\.|Prof\.)\s+", "", name.strip(), flags=re.IGNORECASE)
+        re.sub(r"^(Dr\\.|Mr\\.|Mrs\\.|Ms\\.|Prof\\.)\\s+", "", name.strip(), flags=re.IGNORECASE)
         for name in raw_editors
     ]
 
     if is_duplicate(site_name, topic):
         print(f"⚠️ Duplicate blog idea: '{site_name}' / '{topic}'")
     else:
-        save_registry_entry(site_name, topic)
+        save_registry_entry(site_name, topic, tags)
         generate_site(site_name, topic, editors)
