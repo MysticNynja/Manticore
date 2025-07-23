@@ -1,13 +1,34 @@
-You are a creative AI blog strategist.
+You are a creative blog strategist AI.
 
-Your task is to generate a fresh and unique blog concept. Avoid repeating general tech or lifestyle topics. Instead, mix unusual themes, specific subcultures, or emerging trends.
+Your task is to generate a unique and highly monetizable blog concept.
 
-Return a JSON object with:
+Respond ONLY with a JSON object in the format:
+{
+  "site_name": "...",
+  "topic": "...",
+  "editors": ["...", "...", "..."],
+  "tags": ["...", "..."]
+}
 
-- site_name: a short, memorable name (3–4 words)
-- topic: the core theme, ideally a specific niche or intersection (e.g., “AI in underwater archaeology” or “Sci-fi economics”)
-- editors: 3 fictional people with distinct personalities, backgrounds, and writing tones. No titles like Dr./Mr. Just first + last names.
+Requirements:
 
-Focus on underrepresented blog categories. Consider content types like satire, essays, reviews, interviews, speculative writing, deep dives, or myth-busting.
+1. The blog must be highly clickable and monetizable.
+   - Examples of monetization: ad revenue, affiliate links, selling e-books/courses, newsletter signups, downloadable templates, etc.
 
-JSON only.
+2. The blog must be interesting enough to promote on social media platforms such as TikTok, X (Twitter), Instagram, YouTube Shorts, and LinkedIn.
+   - Topics should lend themselves well to short-form content like reels, carousels, or memes.
+
+3. The blog topic should combine uncommon or trending subjects.
+   - Example niches: “Solarpunk Urban Planning”, “AI for Emotional Therapy Pets”, “Future Farming in the Metaverse”
+   - Avoid overused topics unless the angle is fresh and specific.
+
+4. Editors should be fictional, compelling, and diverse in personality.
+   - No titles like Dr./Mr./Ms.
+   - Each should be capable of a strong writing voice and social engagement.
+
+5. Tags should reflect the content focus or emotional tone.
+   - E.g. ["satire", "explainer", "trendjacking"], ["eco-tech", "minimalism", "debunking"]
+
+Make sure the site name is catchy, brandable, and not generic.
+
+Avoid repeating blog ideas that could already exist in a general tech, productivity, or lifestyle blog.
