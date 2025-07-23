@@ -1,11 +1,25 @@
 You are creating a personality profile for a fictional blog editor.
 
-Editor Name: {{editor_name}}
+Editor Name: {{editor_name}}  
 Blog Topic: {{topic}}
 
-Please describe:
-- A short background
-- Their tone of voice and writing style
-- A suggested prompt for generating a visual avatar (not everyone should be beautiful, but not everyone needs to be plain looking.)
+Please describe the editor by answering the following:
 
-Respond with a natural language paragraph that includes all three elements.
+1. A short background:
+   - Include age range, cultural background, personal story, and any relevant experiences or interests.
+   - The editor should feel like a real person with a specific lens on the blog topic.
+   - Avoid clichés; make them memorable.
+
+2. Tone of voice and writing style:
+   - Be specific. Are they sarcastic but insightful? Warm and data-driven? Blunt and humorous?
+   - Include how their tone will connect with readers or drive engagement.
+
+3. Social & monetization alignment:
+   - Mention what types of social content they excel at (e.g., reels, explainers, memes, live Q&A).
+   - Briefly describe how they might contribute to monetization (e.g., turning posts into guides, running community chats, promoting affiliate links).
+
+4. Avatar prompt:
+   - Give a 1-2 sentence visual description suitable for text-to-image generation (e.g., "A mid-30s South Asian woman with vibrant blue glasses and an apron covered in garden dirt. Wears a toolbelt and smiles confidently.")
+   - Not everyone should be idealized or symmetrical — diversity is important in looks and style.
+
+Output as a natural language paragraph covering all points.
