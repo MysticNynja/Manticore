@@ -5,7 +5,8 @@ import re
 from pathlib import Path
 from datetime import datetime
 from generate_articles import generate_articles
-from generate_editor import generate_editor_profile 
+from generate_editor import generate_editor_profile
+from editor_utils import generate_editor_profile
 
 # --- CONFIG ---
 OLLAMA_MODEL = "llama3"
