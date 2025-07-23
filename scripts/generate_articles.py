@@ -25,6 +25,19 @@ def load_prompt_template(name: str) -> str:
     with open(PROMPTS_DIR / name, "r") as f:
         return f.read()
 
+def get_article_topics_dynamic(topic: str, num_articles: int = 5) -> list:
+    prompt_template = load_prompt_template("article_topic_ideas_prompt.txt")
+    prompt = prompt_template.replace("{{topic}}", topic).replace("{{num_articles}}", str(num_articles))
+
+    response = run_ollama_prompt(prompt)
+
+    try:
+        data = json.loads(re.search(r'\{.*\}', response, re.DOTALL).group())
+        return data.get("article_ideas", [])
+    except Exception as e:
+        print("⚠️ Failed to parse dynamic article topics. Falling back to generic ones.")
+        return [f"A unique angle on {topic} #{i+1}" for i in range(num_articles)]
+
 def generate_article_prompt(site_name, topic, editor, article_topic, date_str, tags):
     profile_path = BLOGS_DIR / site_name / "editors" / f"{editor.replace(' ', '_').lower()}.json"
     if not profile_path.exists():
@@ -54,14 +67,17 @@ def generate_articles(site_name: str, topic: str, editors: list, tags: list):
 
     date_str = datetime.now().strftime("%Y-%m-%d")
 
-    for editor in editors:
-        article_topic = f"A unique angle on {topic} by {editor}"  # Can later randomize
+    print(f"💡 Generating article topics for: {topic}")
+    article_topics = get_article_topics_dynamic(topic, num_articles=len(editors))
+
+    for i, editor in enumerate(editors):
+        article_topic = article_topics[i % len(article_topics)]
         prompt = generate_article_prompt(site_name, topic, editor, article_topic, date_str, tags)
 
         if not prompt:
             continue
 
-        print(f"✍️ Generating article by {editor}...")
+        print(f"✍️ Generating article by {editor} on: {article_topic}")
         result = run_ollama_prompt(prompt)
         filename = articles_dir / f"{editor.replace(' ', '_').lower()}_{date_str}.md"
 
