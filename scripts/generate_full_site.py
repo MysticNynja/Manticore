@@ -4,6 +4,7 @@ import subprocess
 import re
 from pathlib import Path
 from datetime import datetime
+from generate_articles import generate_articles
 
 # --- CONFIG ---
 OLLAMA_MODEL = "llama3"
@@ -140,3 +141,7 @@ if __name__ == "__main__":
     else:
         save_registry_entry(site_name, topic, tags)
         generate_site(site_name, topic, editors)
+
+        # Generate articles for the new site
+        normalized_site_name = site_name.replace(" ", "_").lower()
+        generate_articles(normalized_site_name, topic, editors, tags)
