@@ -1,6 +1,5 @@
 import json
 from pathlib import Path
-from generate_site import generate_editor_profile  # Assumes generate_site.py is in the same module
 
 # --- CONFIG ---
 BASE_DIR = Path(__file__).resolve().parent.parent
