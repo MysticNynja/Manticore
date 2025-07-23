@@ -56,7 +56,14 @@ def generate_article_prompt(site_name, topic, editor, article_topic, date_str, t
     prompt = prompt.replace("{{date}}", date_str)
     prompt = prompt.replace("{{comma_separated_tags}}", ", ".join(tags))
     prompt = prompt.replace("{{avatar_filename}}", f"{editor.replace(' ', '_').lower()}.png")
-    prompt = prompt.replace("{{article_topic}}", article_topic)
+    
+    if isinstance(article_topic, dict):
+        prompt = prompt.replace("{{article_topic}}", article_topic.get("title", "Untitled"))
+        prompt = prompt.replace("{{article_summary}}", article_topic.get("summary", ""))
+    else:
+        prompt = prompt.replace("{{article_topic}}", article_topic)
+        prompt = prompt.replace("{{article_summary}}", "")
+
 
     return prompt
 
