@@ -22,6 +22,14 @@ def load_prompt_template(name: str) -> str:
     with open(PROMPTS_DIR / name, "r") as f:
         return f.read()
 
+def flatten_fields(profile: dict, keys: list):
+    for key in keys:
+        val = profile.get(key, "")
+        if isinstance(val, dict):
+            profile[key] = " ".join(str(v).strip() for v in val.values())
+        elif not isinstance(val, str):
+            profile[key] = str(val).strip()
+
 def generate_editor_profile(editor_name: str, topic: str, output_folder: Path):
     prompt_template = load_prompt_template("editor_profile_prompt.txt")
     prompt = prompt_template.replace("{{editor_name}}", editor_name).replace("{{topic}}", topic)
@@ -32,16 +40,8 @@ def generate_editor_profile(editor_name: str, topic: str, output_folder: Path):
         json_text = re.search(r"\{.*\}", result, re.DOTALL).group()
         profile = json.loads(json_text)
 
-        # --- Flatten nested fields if necessary ---
-        def flatten(value):
-            if isinstance(value, dict):
-                return " ".join(str(v).strip() for v in value.values())
-            return str(value).strip()
-
-        profile["background"] = flatten(profile.get("background", ""))
-        profile["tone"] = flatten(profile.get("tone", ""))
-        profile["avatar_prompt"] = flatten(profile.get("avatar_prompt", ""))
-        profile["raw_profile"] = result.strip()  # keep the whole raw model output
+        flatten_fields(profile, ["background", "tone", "avatar_prompt"])
+        profile["raw_profile"] = result.strip()
 
     except Exception as e:
         print(f"❌ Failed to parse JSON for {editor_name}: {e}")
