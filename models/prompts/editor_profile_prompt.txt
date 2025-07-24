@@ -22,4 +22,16 @@ Please describe the editor by answering the following:
    - Give a 1-2 sentence visual description suitable for text-to-image generation (e.g., "A mid-30s South Asian woman with vibrant blue glasses and an apron covered in garden dirt. Wears a toolbelt and smiles confidently.")
    - Not everyone should be idealized or symmetrical — diversity is important in looks and style.
 
-Output as a natural language paragraph covering all points.
+Return a JSON object with the following fields:
+
+{
+  "name": "{{editor_name}}",
+  "topic": "{{topic}}",
+  "background": "A short bio including age, background, interests, and connection to the topic.",
+  "tone": "Describe the editor's tone of voice and writing style.",
+  "social_strategy": "Mention social content they excel at and how they help monetize the blog.",
+  "avatar_prompt": "A short, creative physical description for avatar generation.",
+  "raw_profile": "Repeat the full personality paragraph here as natural language."
+}
+
+Please format your entire response as valid JSON.
