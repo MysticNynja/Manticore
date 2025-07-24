@@ -12,11 +12,12 @@ PROMPTS_DIR = BASE_DIR / "models" / "prompts"
 def run_ollama_prompt(prompt: str) -> str:
     result = subprocess.run(
         ["ollama", "run", OLLAMA_MODEL],
-        input=prompt.encode(),
+        input=prompt,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
+        text=True  # Handles encoding/decoding
     )
-    return result.stdout.decode()
+    return result.stdout
 
 def load_prompt_template(name: str) -> str:
     with open(PROMPTS_DIR / name, "r") as f:
@@ -30,16 +31,30 @@ def flatten_fields(profile: dict, keys: list):
         elif not isinstance(val, str):
             profile[key] = str(val).strip()
 
+def sanitize_json_output(text: str) -> str:
+    # Extract raw JSON block
+    match = re.search(r"\{.*\}", text, re.DOTALL)
+    if not match:
+        raise ValueError("No JSON found in output.")
+    json_text = match.group()
+
+    # Fix common issues
+    json_text = re.sub(r'([{\[,])\s*(\w+)\s*:', r'\1 "\2":', json_text)  # Quote unquoted keys
+    json_text = re.sub(r':\s*([a-zA-Z_][^"\[{,}\n]*)', r': "\1"', json_text)  # Quote unquoted string values
+    json_text = re.sub(r',\s*([}\]])', r'\1', json_text)  # Remove trailing commas
+
+    return json_text
+
 def generate_editor_profile(editor_name: str, topic: str, output_folder: Path):
     prompt_template = load_prompt_template("editor_profile_prompt.txt")
     prompt = prompt_template.replace("{{editor_name}}", editor_name).replace("{{topic}}", topic)
     result = run_ollama_prompt(prompt)
 
     try:
-        # Extract first JSON object from model output
-        json_text = re.search(r"\{.*\}", result, re.DOTALL).group()
+        json_text = sanitize_json_output(result)
         profile = json.loads(json_text)
 
+        # Flatten nested fields
         flatten_fields(profile, ["background", "tone", "avatar_prompt"])
         profile["raw_profile"] = result.strip()
 
@@ -54,18 +69,3 @@ def generate_editor_profile(editor_name: str, topic: str, output_folder: Path):
         json.dump(profile, f, indent=2)
 
     print(f"✅ Saved profile for {editor_name}")
-
-def sanitize_json_output(text: str) -> str:
-    # Extract raw JSON block
-    match = re.search(r"\{.*\}", text, re.DOTALL)
-    if not match:
-        raise ValueError("No JSON found in output.")
-    json_text = match.group()
-
-    # Common cleanup fixes
-    json_text = re.sub(r'([{\[,])\s*(\w+)\s*:', r'\1 "\2":', json_text)  # unquoted keys
-    json_text = re.sub(r':\s*([^"\[{][^,\n}]*)', r': "\1"', json_text)   # unquoted string values
-    json_text = re.sub(r',\s*}', '}', json_text)                         # trailing commas
-    json_text = re.sub(r',\s*]', ']', json_text)
-
-    return json_text
