@@ -15,5 +15,23 @@
       "event design",
       "VR experience"
     ]
+  },
+  {
+    "site_name": "MetaMuse",
+    "topic": "AI-Generated Art Therapy for Mental Health",
+    "tags": [
+      "mental wellness",
+      "digital art",
+      "emotional expression"
+    ]
+  },
+  {
+    "site_name": "BuzzHive",
+    "topic": "AI-Generated Mental Health Journeys: Personal Stories & Interventions",
+    "tags": [
+      "mental health",
+      "AI-fueled storytelling",
+      "self-care"
+    ]
   }
 ]
