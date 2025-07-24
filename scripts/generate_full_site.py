@@ -70,16 +70,28 @@ def is_duplicate(site_name: str, topic: str) -> bool:
     return False
 
 def parse_editor_profile(raw_profile: str) -> dict:
-    background_match = re.search(r"(?i)(background|story)[\s:.-]*(.*?)(?=tone of voice|writing style|avatar|$)", raw_profile, re.DOTALL)
-    tone_match = re.search(r"(?i)(tone of voice|writing style)[\s:.-]*(.*?)(?=avatar|$)", raw_profile, re.DOTALL)
-    avatar_match = re.search(r"(?i)(avatar prompt|visual description)[\s:.-]*(.*)$", raw_profile, re.DOTALL)
+    background_match = re.search(
+        r"(?:background|1\.\s*A short background:)[\s:.-]*([\s\S]*?)(?=2\.|tone of voice|writing style|avatar|$)",
+        raw_profile, re.IGNORECASE
+    )
+
+    tone_match = re.search(
+        r"(?:tone of voice and writing style|tone-wise|2\.\s*tone)[\s:.-]*([\s\S]*?)(?=3\.|avatar|$)",
+        raw_profile, re.IGNORECASE
+    )
+
+    avatar_match = re.search(
+        r"(?:avatar prompt|visual description|4\.\s*avatar)[\s:.-]*([\s\S]*?)$",
+        raw_profile, re.IGNORECASE
+    )
 
     return {
-        "background": background_match.group(2).strip() if background_match else "",
-        "tone": tone_match.group(2).strip() if tone_match else "",
-        "avatar_prompt": avatar_match.group(2).strip() if avatar_match else "",
+        "background": background_match.group(1).strip() if background_match else "",
+        "tone": tone_match.group(1).strip() if tone_match else "",
+        "avatar_prompt": avatar_match.group(1).strip() if avatar_match else "",
         "raw_profile": raw_profile.strip()
     }
+
 
 def generate_editor_profile(editor_name: str, topic: str, output_folder: Path):
     prompt_template = load_prompt_template("editor_profile_prompt.txt")
