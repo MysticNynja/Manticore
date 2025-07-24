@@ -31,6 +31,18 @@ def generate_editor_profile(editor_name: str, topic: str, output_folder: Path):
         # Extract first JSON object from model output
         json_text = re.search(r"\{.*\}", result, re.DOTALL).group()
         profile = json.loads(json_text)
+
+        # --- Flatten nested fields if necessary ---
+        def flatten(value):
+            if isinstance(value, dict):
+                return " ".join(str(v).strip() for v in value.values())
+            return str(value).strip()
+
+        profile["background"] = flatten(profile.get("background", ""))
+        profile["tone"] = flatten(profile.get("tone", ""))
+        profile["avatar_prompt"] = flatten(profile.get("avatar_prompt", ""))
+        profile["raw_profile"] = result.strip()  # keep the whole raw model output
+
     except Exception as e:
         print(f"❌ Failed to parse JSON for {editor_name}: {e}")
         print("Raw output:\n", result)
@@ -42,4 +54,5 @@ def generate_editor_profile(editor_name: str, topic: str, output_folder: Path):
         json.dump(profile, f, indent=2)
 
     print(f"✅ Saved profile for {editor_name}")
+
 
