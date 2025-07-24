@@ -24,7 +24,7 @@ date: "{{date}}"
 tags: ["{{comma_separated_tags}}"]
 summary: "A short, engaging summary of the article"
 avatar: "/editors/{{avatar_filename}}"
-editor_tone: "{{editor_tone}}"
+editor_tone: {{editor_tone}}
 ---
 
 After the frontmatter, include the full body of the article written in Markdown. You may use headers, bullet points, links, quotes, and short paragraphs to make it skimmable and readable.
