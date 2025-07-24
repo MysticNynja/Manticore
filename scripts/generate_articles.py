@@ -2,6 +2,7 @@ import os
 import json
 import subprocess
 import re
+import textwrap
 from pathlib import Path
 from datetime import datetime
 
@@ -38,6 +39,13 @@ def get_article_topics_dynamic(topic: str, num_articles: int = 5) -> list:
         print("⚠️ Failed to parse dynamic article topics. Falling back to generic ones.")
         return [f"A unique angle on {topic} #{i+1}" for i in range(num_articles)]
 
+def yaml_escape_multiline(value):
+    if "\n" in value:
+        indented = textwrap.indent(value.strip(), "  ")
+        return f"|\n{indented}"
+    else:
+        return f"\"{value.strip()}\""
+
 def generate_article_prompt(site_name, topic, editor, article_topic, date_str, tags):
     profile_path = BLOGS_DIR / site_name / "editors" / f"{editor.replace(' ', '_').lower()}.json"
     if not profile_path.exists():
@@ -48,22 +56,28 @@ def generate_article_prompt(site_name, topic, editor, article_topic, date_str, t
         profile = json.load(f)
 
     prompt_template = load_prompt_template("article_prompt.txt")
+
+    # YAML-safe replacements
+    editor_tone = profile.get("tone", "")
+    editor_background = profile.get("background", "")
+    editor_avatar = f"{editor.replace(' ', '_').lower()}.png"
+
     prompt = prompt_template.replace("{{editor_name}}", editor)
     prompt = prompt.replace("{{site_name}}", site_name.replace('_', ' ').title())
     prompt = prompt.replace("{{topic}}", topic)
-    prompt = prompt.replace("{{editor_tone}}", profile.get("tone", ""))
-    prompt = prompt.replace("{{editor_background}}", profile.get("background", ""))
+    prompt = prompt.replace("{{editor_tone}}", yaml_escape_multiline(editor_tone))
+    prompt = prompt.replace("{{editor_background}}", yaml_escape_multiline(editor_background))
     prompt = prompt.replace("{{date}}", date_str)
     prompt = prompt.replace("{{comma_separated_tags}}", ", ".join(tags))
-    prompt = prompt.replace("{{avatar_filename}}", f"{editor.replace(' ', '_').lower()}.png")
-    
+    prompt = prompt.replace("{{avatar_filename}}", editor_avatar)
+
+    # Handle article_topic as dict or string
     if isinstance(article_topic, dict):
         prompt = prompt.replace("{{article_topic}}", article_topic.get("title", "Untitled"))
         prompt = prompt.replace("{{article_summary}}", article_topic.get("summary", ""))
     else:
         prompt = prompt.replace("{{article_topic}}", article_topic)
         prompt = prompt.replace("{{article_summary}}", "")
-
 
     return prompt
 
