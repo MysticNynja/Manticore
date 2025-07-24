@@ -1,0 +1,12 @@
+You are an editorial strategist. Create an outline for a new blog called "GlintHub" that covers the topic of "Sustainable Fashion for the Modern Gamer".
+
+Define three editor personas with distinct styles and voice:
+["Vespera 'Vee' Vega", "Kael 'Kae' Kuznetsov", "Luna Nightshade"]
+
+For each editor, describe their:
+- Tone
+- Area of expertise
+- Suggested article titles (3 per editor)
+- A visual style or theme
+
+Keep the tone journalistic and creative.
