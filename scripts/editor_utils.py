@@ -55,4 +55,17 @@ def generate_editor_profile(editor_name: str, topic: str, output_folder: Path):
 
     print(f"✅ Saved profile for {editor_name}")
 
+def sanitize_json_output(text: str) -> str:
+    # Extract raw JSON block
+    match = re.search(r"\{.*\}", text, re.DOTALL)
+    if not match:
+        raise ValueError("No JSON found in output.")
+    json_text = match.group()
 
+    # Common cleanup fixes
+    json_text = re.sub(r'([{\[,])\s*(\w+)\s*:', r'\1 "\2":', json_text)  # unquoted keys
+    json_text = re.sub(r':\s*([^"\[{][^,\n}]*)', r': "\1"', json_text)   # unquoted string values
+    json_text = re.sub(r',\s*}', '}', json_text)                         # trailing commas
+    json_text = re.sub(r',\s*]', ']', json_text)
+
+    return json_text
