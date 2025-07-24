@@ -32,26 +32,28 @@ def flatten_fields(profile: dict, keys: list):
             profile[key] = str(val).strip()
 
 def sanitize_json_output(text: str) -> str:
-    # Extract JSON-like block
     match = re.search(r"\{.*\}", text, re.DOTALL)
     if not match:
         raise ValueError("No JSON found in output.")
     json_text = match.group()
 
-    # Remove // comments
+    # Strip any comments
     json_text = re.sub(r'//.*', '', json_text)
 
-    # Quote unquoted keys
+    # Quote keys if missing quotes
     json_text = re.sub(r'([{,])\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*:', r'\1 "\2":', json_text)
 
-    # Quote unquoted string values (very basic)
-    json_text = re.sub(r':\s*([a-zA-Z_][\w\s\.\-]*)(?=,|\n|\})', r': "\1"', json_text)
+    # Fix unquoted values (basic cases)
+    json_text = re.sub(r':\s*([a-zA-Z_][\w\s\-]+)(?=\s*[,}])', r': "\1"', json_text)
 
-    # Fix trailing commas
+    # Remove trailing commas before } or ]
     json_text = re.sub(r',\s*([\]}])', r'\1', json_text)
 
-    return json_text
+    # Ensure JSON ends properly
+    if not json_text.strip().endswith("}"):
+        json_text += "}"
 
+    return json_text
 
 def generate_editor_profile(editor_name: str, topic: str, output_folder: Path):
     prompt_template = load_prompt_template("editor_profile_prompt.txt")
@@ -69,6 +71,9 @@ def generate_editor_profile(editor_name: str, topic: str, output_folder: Path):
     except Exception as e:
         print(f"❌ Failed to parse JSON for {editor_name}: {e}")
         print("Raw output:\n", result)
+    
+        # Make sure folder exists before trying to write the debug file
+        output_folder.mkdir(parents=True, exist_ok=True)
     
         debug_path = output_folder / f"{editor_name.replace(' ', '_').lower()}_debug.txt"
         with open(debug_path, "w") as f:
