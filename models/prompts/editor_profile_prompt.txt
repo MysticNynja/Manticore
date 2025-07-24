@@ -34,4 +34,13 @@ Return a JSON object with the following fields:
   "raw_profile": "Repeat the full personality paragraph here as natural language."
 }
 
-Please format your entire response as valid JSON.
+Respond only with a valid JSON object with the following top-level fields:
+- name
+- topic
+- background (object)
+- tone (object)
+- social_strategy (object)
+- avatar_prompt (string)
+- raw_profile (string)
+
+DO NOT include any comments (//) or markdown. Ensure all string values are quoted. Return only the JSON object and nothing else.
