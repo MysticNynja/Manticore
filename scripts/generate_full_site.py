@@ -8,6 +8,7 @@ from generate_articles import generate_articles
 from generate_editor import generate_editor_profile
 from editor_utils import generate_editor_profile
 
+
 # --- CONFIG ---
 OLLAMA_MODEL = "llama3"
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -68,50 +69,6 @@ def is_duplicate(site_name: str, topic: str) -> bool:
         if entry["site_name"].lower() == site_name.lower() or entry["topic"].lower() == topic.lower():
             return True
     return False
-
-def parse_editor_profile(raw_profile: str) -> dict:
-    background_match = re.search(
-        r"(?:background|1\.\s*A short background:)[\s:.-]*([\s\S]*?)(?=2\.|tone of voice|writing style|avatar|$)",
-        raw_profile, re.IGNORECASE
-    )
-
-    tone_match = re.search(
-        r"(?:tone of voice and writing style|tone-wise|2\.\s*tone)[\s:.-]*([\s\S]*?)(?=3\.|avatar|$)",
-        raw_profile, re.IGNORECASE
-    )
-
-    avatar_match = re.search(
-        r"(?:avatar prompt|visual description|4\.\s*avatar)[\s:.-]*([\s\S]*?)$",
-        raw_profile, re.IGNORECASE
-    )
-
-    return {
-        "background": background_match.group(1).strip() if background_match else "",
-        "tone": tone_match.group(1).strip() if tone_match else "",
-        "avatar_prompt": avatar_match.group(1).strip() if avatar_match else "",
-        "raw_profile": raw_profile.strip()
-    }
-
-
-def generate_editor_profile(editor_name: str, topic: str, output_folder: Path):
-    prompt_template = load_prompt_template("editor_profile_prompt.txt")
-    prompt = prompt_template.replace("{{editor_name}}", editor_name).replace("{{topic}}", topic)
-    result = run_ollama_prompt(prompt)
-    parsed = parse_editor_profile(result)
-
-    editor_data = {
-        "name": editor_name,
-        "topic": topic,
-        "background": parsed["background"],
-        "tone": parsed["tone"],
-        "avatar_prompt": parsed["avatar_prompt"],
-        "raw_profile": parsed["raw_profile"]
-    }
-
-    output_folder.mkdir(parents=True, exist_ok=True)
-    profile_path = output_folder / f"{editor_name.replace(' ', '_').lower()}.json"
-    with open(profile_path, "w") as f:
-        json.dump(editor_data, f, indent=2)
 
 def generate_site(site_name: str, topic: str, editors: list):
     prompt_template = load_prompt_template("site_prompt.txt")
