@@ -55,11 +55,14 @@ def generate_article_prompt(site_name, topic, editor, article_topic, date_str, t
     with open(profile_path) as f:
         profile = json.load(f)
 
+    if not profile.get("tone") or not profile.get("background"):
+        print(f"⚠️ Incomplete editor profile: {editor}")
+
     prompt_template = load_prompt_template("article_prompt.txt")
 
     # YAML-safe replacements
-    editor_tone = profile.get("tone", "")
-    editor_background = profile.get("background", "")
+    editor_tone = yaml_escape_multiline(profile.get("tone", ""))
+    editor_background = yaml_escape_multiline(profile.get("background", ""))
     editor_avatar = f"{editor.replace(' ', '_').lower()}.png"
 
     prompt = prompt_template.replace("{{editor_name}}", editor)
