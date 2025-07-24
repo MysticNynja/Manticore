@@ -1,7 +1,7 @@
-You are an editorial strategist. Create an outline for a new blog called "GlintHub" that covers the topic of "Sustainable Fashion for the Modern Gamer".
+You are an editorial strategist. Create an outline for a new blog called "Riffle" that covers the topic of "Sustainable Gaming for Social Impact".
 
 Define three editor personas with distinct styles and voice:
-["Vespera 'Vee' Vega", "Kael 'Kae' Kuznetsov", "Luna Nightshade"]
+["Kairos", "Zephyr", "Lumina"]
 
 For each editor, describe their:
 - Tone

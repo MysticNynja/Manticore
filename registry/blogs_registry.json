@@ -52,5 +52,32 @@
       "fashion tech",
       "debutante"
     ]
+  },
+  {
+    "site_name": "RetroFutura",
+    "topic": "Vintage AI-Powered Fashion Trends Revived for Modern Living",
+    "tags": [
+      "retrocomputing",
+      "fashiontech",
+      "nostalgia"
+    ]
+  },
+  {
+    "site_name": "EchoPulse",
+    "topic": "Sonic Branding for Emotional Wellbeing",
+    "tags": [
+      "sonic branding",
+      "emotional intelligence",
+      "wellness"
+    ]
+  },
+  {
+    "site_name": "Riffle",
+    "topic": "Sustainable Gaming for Social Impact",
+    "tags": [
+      "gameification",
+      "social entrepreneurship",
+      "eco-gaming"
+    ]
   }
 ]
