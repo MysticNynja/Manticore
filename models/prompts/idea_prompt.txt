@@ -25,6 +25,8 @@ Requirements:
 4. Editors should be fictional, compelling, and diverse in personality.
    - No titles like Dr./Mr./Ms.
    - Each should be capable of a strong writing voice and social engagement.
+   - No nicknames, there should just be first and last name.
+   - Please have a weight for normal names. I enjoy unique names as much as possible, but recently I have been getting more uncommon.
 
 5. Tags should reflect the content focus or emotional tone.
    - E.g. ["satire", "explainer", "trendjacking"], ["eco-tech", "minimalism", "debunking"]
