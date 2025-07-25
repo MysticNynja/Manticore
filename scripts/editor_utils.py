@@ -48,7 +48,7 @@ def clean_json_output(json_text):
     raw = re.sub(r'":\s*"true"', '": true', raw)
     raw = re.sub(r'":\s*"false"', '": false', raw)
 
-    return json.loads(fixed)
+    return json.loads(raw)
 
 def sanitize_json_output(text: str) -> str:
     match = re.search(r"\{.*\}", text, re.DOTALL)
