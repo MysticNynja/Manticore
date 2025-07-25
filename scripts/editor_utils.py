@@ -33,17 +33,16 @@ def flatten_fields(profile: dict, keys: list):
 
 import html
 
-def clean_json_output(json_text: str) -> dict:
-    # Extract the first full JSON object from the text
+def clean_json_output(json_text):
     match = re.search(r'\{.*\}', json_text, re.DOTALL)
-    if match:
-        try:
-            return json.loads(match.group(0))
-        except json.JSONDecodeError as e:
-            print("⚠️ JSON decode error after extraction:", e)
-            raise
-    else:
-        raise ValueError("No valid JSON object found in output.")
+    if not match:
+        raise ValueError("No valid JSON found")
+
+    raw = match.group(0)
+    # Fix boolean strings (e.g. "true" -> true)
+    fixed = re.sub(r'":\s*"true"', '": true', raw)
+    fixed = re.sub(r'":\s*"false"', '": false', fixed)
+    return json.loads(fixed)
 
 def sanitize_json_output(text: str) -> str:
     match = re.search(r"\{.*\}", text, re.DOTALL)
