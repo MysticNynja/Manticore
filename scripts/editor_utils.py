@@ -4,6 +4,7 @@ import subprocess
 import json
 import re
 from pathlib import Path
+import unicodedata
 
 OLLAMA_MODEL = "llama3"
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -71,34 +72,37 @@ def sanitize_json_output(text: str) -> str:
 
     return json_text
 
+def slugify(name):
+    name = unicodedata.normalize('NFKD', name).encode('ascii', 'ignore').decode()
+    return re.sub(r'\W+', '_', name.lower()).strip('_')
+
+
 def generate_editor_profile(editor_name: str, topic: str, output_folder: Path):
     prompt_template = load_prompt_template("editor_profile_prompt.txt")
     prompt = prompt_template.replace("{{editor_name}}", editor_name).replace("{{topic}}", topic)
     result = run_ollama_prompt(prompt)
 
     try:
-        json_text = sanitize_json_output(result)
-        profile = clean_json_output(json_text)
-
-        # Flatten nested fields
+        profile = clean_json_output(result)
         flatten_fields(profile, ["background", "tone", "avatar_prompt"])
         profile["raw_profile"] = result.strip()
 
     except Exception as e:
         print(f"❌ Failed to parse JSON for {editor_name}: {e}")
         print("Raw output:\n", result)
-    
-        # Make sure folder exists before trying to write the debug file
+
         output_folder.mkdir(parents=True, exist_ok=True)
-    
-        debug_path = output_folder / f"{editor_name.replace(' ', '_').lower()}_debug.txt"
+        debug_path = output_folder / f"{slugify(editor_name)}_debug.txt"
         with open(debug_path, "w") as f:
             f.write(result)
         return
 
+    editor_slug = slugify(editor_name)
+    profile_path = output_folder / f"{editor_slug}.json"
+
     output_folder.mkdir(parents=True, exist_ok=True)
-    profile_path = output_folder / f"{editor_name.replace(' ', '_').lower()}.json"
     with open(profile_path, "w") as f:
         json.dump(profile, f, indent=2)
 
     print(f"✅ Saved profile for {editor_name}")
+
