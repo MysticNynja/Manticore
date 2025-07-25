@@ -33,6 +33,18 @@ def flatten_fields(profile: dict, keys: list):
 
 import html
 
+def clean_json_output(json_text: str) -> dict:
+    # Extract the first full JSON object from the text
+    match = re.search(r'\{.*\}', json_text, re.DOTALL)
+    if match:
+        try:
+            return json.loads(match.group(0))
+        except json.JSONDecodeError as e:
+            print("⚠️ JSON decode error after extraction:", e)
+            raise
+    else:
+        raise ValueError("No valid JSON object found in output.")
+
 def sanitize_json_output(text: str) -> str:
     match = re.search(r"\{.*\}", text, re.DOTALL)
     if not match:
@@ -67,7 +79,7 @@ def generate_editor_profile(editor_name: str, topic: str, output_folder: Path):
 
     try:
         json_text = sanitize_json_output(result)
-        profile = json.loads(json_text)
+        profile = clean_json_output(json_text)
 
         # Flatten nested fields
         flatten_fields(profile, ["background", "tone", "avatar_prompt"])
