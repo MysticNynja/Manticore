@@ -31,20 +31,25 @@ def flatten_fields(profile: dict, keys: list):
         elif not isinstance(val, str):
             profile[key] = str(val).strip()
 
+import html
+
 def sanitize_json_output(text: str) -> str:
     match = re.search(r"\{.*\}", text, re.DOTALL)
     if not match:
         raise ValueError("No JSON found in output.")
     json_text = match.group()
 
-    # Strip any comments
+    # Remove comments
     json_text = re.sub(r'//.*', '', json_text)
 
-    # Quote keys if missing quotes
+    # Remove or escape control characters
+    json_text = re.sub(r'[\x00-\x1F\x7F]', '', json_text)  # Control characters
+
+    # Properly quote unquoted keys (e.g., {key: "value"})
     json_text = re.sub(r'([{,])\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*:', r'\1 "\2":', json_text)
 
-    # Fix unquoted values (basic cases)
-    json_text = re.sub(r':\s*([a-zA-Z_][\w\s\-]+)(?=\s*[,}])', r': "\1"', json_text)
+    # Fix simple unquoted values
+    json_text = re.sub(r':\s*([^"\[{][^,\n}]*)', r': "\1"', json_text)
 
     # Remove trailing commas before } or ]
     json_text = re.sub(r',\s*([\]}])', r'\1', json_text)
