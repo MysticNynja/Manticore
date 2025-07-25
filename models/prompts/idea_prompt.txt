@@ -40,3 +40,5 @@ Bonus Points:
 Think like a culture hacker. Avoid safe ideas. Go strange, go sharp, go specific.
 
 Respond ONLY with a valid JSON object. Do not include any preamble, commentary, or extra text.
+
+IMPORTANT: Respond ONLY with valid JSON. Do not add any commentary, cander or labels. All boolean fields must use true/false (not strings).
