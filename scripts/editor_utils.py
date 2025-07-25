@@ -40,9 +40,14 @@ def clean_json_output(json_text):
         raise ValueError("No valid JSON found")
 
     raw = match.group(0)
-    # Fix boolean strings (e.g. "true" -> true)
-    fixed = re.sub(r'":\s*"true"', '": true', raw)
-    fixed = re.sub(r'":\s*"false"', '": false', fixed)
+    
+    # Remove trailing commas before } or ]
+    raw = re.sub(r",\s*([}\]])", r"\1", raw)
+
+    # Convert stringified booleans to real ones
+    raw = re.sub(r'":\s*"true"', '": true', raw)
+    raw = re.sub(r'":\s*"false"', '": false', raw)
+
     return json.loads(fixed)
 
 def sanitize_json_output(text: str) -> str:
