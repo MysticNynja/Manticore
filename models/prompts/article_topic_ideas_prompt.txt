@@ -16,3 +16,5 @@ Return the list in valid JSON format:
     ...
   ]
 }
+
+IMPORTANT: Respond ONLY with valid JSON. Do not add any commentary, cander or labels. All boolean fields must use true/false (not strings).
