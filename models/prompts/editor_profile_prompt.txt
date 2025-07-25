@@ -60,3 +60,6 @@ You should instruct the prompt to output this as:
   "warm_data-driven": "false"
 }
 Or better yet — use a string description, which is easier to parse.
+
+IMPORTANT: Respond ONLY with valid JSON. Do not add any commentary, cander or labels. All boolean fields must use true/false (not strings).
+
