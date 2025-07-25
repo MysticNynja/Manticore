@@ -35,6 +35,7 @@ Return a JSON object with the following fields:
 }
 
 Respond only with a valid JSON object with the following top-level fields:
+
 - name
 - topic
 - background (object)
@@ -44,3 +45,18 @@ Respond only with a valid JSON object with the following top-level fields:
 - raw_profile (string)
 
 DO NOT include any comments (//) or markdown. Ensure all string values are quoted. Return only the JSON object and nothing else.
+
+wrap all generated values in double quotes and avoid using problematic symbols in keys or booleans (like true/false in lowercase outside strings). LLMs often mix these up.
+
+So if you see fields like this:
+"tone": {
+  "sarcastic_insightful": true,
+  "warm_data-driven": false,
+  ...
+}
+You should instruct the prompt to output this as:
+"tone": {
+  "sarcastic_insightful": "true",
+  "warm_data-driven": "false"
+}
+Or better yet — use a string description, which is easier to parse.
