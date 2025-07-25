@@ -9,4 +9,6 @@ For each editor, describe their:
 - Suggested article titles (3 per editor)
 - A visual style or theme
 
-Keep the tone journalistic and creative.
+Keep the tone journalistic and creative. Make sure that these are real topics though.  Unless we are dealing with a fantasy blog, then that is alright.
+
+IMPORTANT: Respond ONLY with valid JSON. Do not add any commentary, cander or labels. All boolean fields must use true/false (not strings).
