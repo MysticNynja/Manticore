@@ -5,6 +5,7 @@ import json
 import re
 from pathlib import Path
 import unicodedata
+import html
 
 OLLAMA_MODEL = "llama3"
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -32,23 +33,25 @@ def flatten_fields(profile: dict, keys: list):
         elif not isinstance(val, str):
             profile[key] = str(val).strip()
 
-import html
-
-def clean_json_output(json_text):
-    match = re.search(r'\{.*\}', json_text, re.DOTALL)
+def clean_json_output(text: str) -> dict:
+    # Extract JSON from any surrounding text
+    match = re.search(r'\{[\s\S]*\}', text)
     if not match:
-        raise ValueError("No valid JSON found")
-
-    raw = match.group(0)
+        raise ValueError("No JSON object found in model output.")
     
-    # Remove trailing commas before } or ]
-    raw = re.sub(r",\s*([}\]])", r"\1", raw)
+    raw = match.group(0)
 
-    # Convert stringified booleans to real ones
+    # Fix common model formatting issues
+    raw = re.sub(r",\s*([}\]])", r"\1", raw)  # Remove trailing commas
     raw = re.sub(r'":\s*"true"', '": true', raw)
     raw = re.sub(r'":\s*"false"', '": false', raw)
+    raw = re.sub(r"“|”", '"', raw)  # Fancy quotes to straight
+    raw = re.sub(r"‘|’", "'", raw)
 
-    return json.loads(raw)
+    try:
+        return json.loads(raw)
+    except json.JSONDecodeError as e:
+        raise ValueError(f"JSON decoding failed: {e.msg}") from e
 
 def sanitize_json_output(text: str) -> str:
     match = re.search(r"\{.*\}", text, re.DOTALL)
